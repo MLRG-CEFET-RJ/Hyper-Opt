@@ -1,4 +1,4 @@
-# MLP-Tensorflow-Tools
+# AutoML with Tensorflow
 A short and simple 3 layers Neural Network Tensorflow code to classification
 
 ## Dependencies
