@@ -27,3 +27,5 @@ Example: python neural_network.py 100 200 300 0.001 0
 ## Learning plot
 At the end of the execution, some metrics like error rate and accuracy will be presented.  
 A learning plot will also be displayed with train and test error rate.  
+
+![Screenshot](learning_plot.png)
