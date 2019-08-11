@@ -24,12 +24,13 @@ def transform_data(x_train, x_test):
 	
 	trainY = np.int_(trainY.reshape(-1))
 	trainY = np.eye(num_classes)[trainY] #one hot vector
-	#print('\n', 'training data loaded successfully!')
+	#print('\nTraining data loaded successfully!')
 
 	[testX, testY] = np.hsplit(x_test,[x_test.shape[1]-1])
 	testY = np.int_(testY.reshape(-1))
 	testY = np.eye(num_classes)[testY] #one hot vector
-	#print('test data loaded successfully!', '\n')
+	#print('Test data loaded successfully!', '\n')
+
 	trainX, testX = tree_feature_selection(trainX, trainY, testX)
 
 	return trainX, trainY, testX, testY, num_classes
@@ -37,18 +38,22 @@ def transform_data(x_train, x_test):
 def nn_performance_metrics(pred_model, pred_true, train_model, train_true):
   precision = precision_score(pred_true, pred_model, average='macro')
   recall = recall_score(pred_true, pred_model, average='macro')
-  f1 = f1_score(pred_true, pred_model, average='macro')
+  f1_test = f1_score(pred_true, pred_model, average='macro')
+  f1_train = f1_score(train_true, train_model, average='macro')
 
   acc_train = accuracy_score(train_true, train_model)
   acc_test = accuracy_score(pred_true, pred_model)
 
-  print("\nTrain accuracy: ", acc_train)
-  print("Test accuracy: ", acc_test)
+  print("\nTrain F1: ", '{0:.3f}'.format(f1_train))
+  print("Test F1: ", '{0:.3f}'.format(f1_test))
+
+  print("\nTrain accuracy: ", '{0:.3f}'.format(acc_train))
+  print("Test accuracy: ", '{0:.3f}'.format(acc_test))
 
   print("\nTrain error: ", '{0:.2%}'.format(1-acc_train))
   print("Test error: ", '{0:.2%}'.format(1-acc_test))
 
-  return precision, recall, f1, acc_test
+  return precision, recall, f1_test, acc_test
 
 def tree_feature_selection(trainX, trainY, testX):
     clf = ExtraTreesClassifier(n_estimators=50)
