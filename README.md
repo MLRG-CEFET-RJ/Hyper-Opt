@@ -8,3 +8,18 @@ scikit-learn 0.21.1
 scipy 1.2.1  
 tensorflow 1.13.1 (to CPU process)  
 tensorflow-gpu 1.13.1 (to GPU process)  
+
+## Architecture
+It's a 3 hidden layers MLP.  
+You just need to specify a .csv file with the data to training, test or validation in dataset folder.  
+It's set to iterate up to 300 epochs with an early stopping logic to avoid loss divergence.  
+You can set 5 hyperparameters via command line arguments.
+
+## Hyperparameters
+System args: LAYER1, LAYER2, LAYER3, LR, BETA  
+LAYER1 = Neurons number in the first hidden layer  
+LAYER2 = Neurons number in the second hidden layer  
+LAYER3 = Neurons number in the third hidden layer  
+LR = learning rate  
+BETA = beta parameter to regularization. 0 to ignore  
+Example: python neural_network.py 100 200 300 0.001 0  
