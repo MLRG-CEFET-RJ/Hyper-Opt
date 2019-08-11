@@ -2,6 +2,8 @@
 A short and simple 3 layers Neural Network Tensorflow code to classification
 
 ## Dependencies
+python 3.6.8 
+#### Packages
 numpy 1.16.3  
 pandas 0.24.2  
 scikit-learn 0.21.1  
@@ -28,4 +30,4 @@ Example: python neural_network.py 100 200 300 0.001 0
 At the end of the execution, some metrics like error rate and accuracy will be presented.  
 A learning plot will also be displayed with train and test error rate.  
 
-![Screenshot](learning_plot.png)
+<img src="./learning_plot.png" width="440" height="280">
