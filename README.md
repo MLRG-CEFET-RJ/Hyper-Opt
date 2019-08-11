@@ -26,6 +26,10 @@ LR = learning rate
 BETA = beta parameter to regularization. 0 to ignore  
 Example: python neural_network.py 100 200 300 0.001 0  
 
+## Feature Selection
+The method ExtraTreesClassifier is automatically applied to reduce the data dimension.  
+In the MNIST example, the data dimension is reduced of 784 features to 274.
+
 ## Learning plot
 At the end of the execution, some metrics like error rate and accuracy will be presented.  
 A learning plot will also be displayed with train and test error rate.  
