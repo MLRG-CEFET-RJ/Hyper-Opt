@@ -23,8 +23,8 @@ Example: python neural_network.py 100 200 300 0.001 0
 '''
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
-train_path =  "/home/mserqueira/BRKGA/src/python/datasets/mnist_train.csv"
-test_path = "/home/mserqueira/BRKGA/src/python/datasets/mnist_val.csv"
+train_path =  "/home/mserqueira/src/python/datasets/mnist_train.csv"
+test_path = "/home/mserqueira/src/python/datasets/mnist_val.csv"
 
 epochs_no = 300 #Number of epochs
 batch_size = 32 #Batch size
