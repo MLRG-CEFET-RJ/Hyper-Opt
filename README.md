@@ -18,17 +18,20 @@ It's set to iterate up to 300 epochs with an early stopping logic to avoid loss 
 You can set 5 hyperparameters via command line arguments.
 
 ## Hyperparameters
-System args: LAYER1, LAYER2, LAYER3, LR, BETA  
 LAYER1 = Neurons number in the first hidden layer  
 LAYER2 = Neurons number in the second hidden layer  
 LAYER3 = Neurons number in the third hidden layer  
 LR = learning rate  
 BETA = beta parameter to regularization. 0 to ignore  
-Example: python neural_network.py 100 200 300 0.001 0  
 
 ## Feature Selection
 The method ExtraTreesClassifier is automatically applied to reduce the data dimension.  
 In the MNIST example, the data dimension is reduced of 784 features to 274.
+
+## Results
+The best result founded in the Random Search is saved in the folder **TF_model**.  
+The test/validation classification is inside this folder (**classification.csv**)  
+The Tensorflow model (session) is saved inside the **sess** folder.
 
 ## Learning plot
 At the end of the execution, some metrics like error rate and accuracy will be presented.  
