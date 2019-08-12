@@ -172,7 +172,6 @@ def random_search(num_trials):
         layers = np.random.randint(low=500, high=1000, size=3)
         lr = float(np.around(np.random.uniform(low=0.1, high=0.0001, size=1), decimals=6))
         rr = float(np.around(np.random.uniform(low=0, high=0.001, size=1), decimals=6))
-        print("Iteration number: ", layers, '\n')
         max_objective = build_graph(layers[0], layers[1], layers[2], lr, rr, best_result)
         
         if max_objective > best_result:
