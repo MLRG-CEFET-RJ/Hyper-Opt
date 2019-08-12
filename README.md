@@ -14,8 +14,8 @@ tensorflow-gpu 1.13.1 (to GPU process)
 ## Architecture
 It's a 3 hidden layers MLP.  
 You just need to specify a .csv file with the data to training, test or validation in dataset folder.  
-It's set to iterate up to 300 epochs with an early stopping logic to avoid loss divergence.  
-You can set 5 hyperparameters via command line arguments.
+You can set up the training/test file in the variable *train_path* and *test_path* ** neural_network.py **
+It's set to iterate up to 300 epochs with an early stopping logic to avoid divergence.  
 
 ## Hyperparameters
 LAYER1 = Neurons number in the first hidden layer  
@@ -23,6 +23,8 @@ LAYER2 = Neurons number in the second hidden layer
 LAYER3 = Neurons number in the third hidden layer  
 LR = learning rate  
 BETA = beta parameter to regularization. 0 to ignore  
+The Hyperparameter optimization search is performed by a Random Search algorithm with 3 trails of hyperparameter
+** You can change the number of trails in the main function **
 
 ## Feature Selection
 The method ExtraTreesClassifier is automatically applied to reduce the data dimension.  
