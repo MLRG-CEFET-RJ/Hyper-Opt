@@ -1,5 +1,6 @@
 # AutoML with Tensorflow
-A short and simple 3 layers Neural Network Tensorflow code to classification
+A short and simple 3 layers Neural Network Tensorflow code to classification  
+Just specify your train and test/validation sets and let the algorithm classify your data!
 
 ## Dependencies
 python 3.6.8 
