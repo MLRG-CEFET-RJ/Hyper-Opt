@@ -14,7 +14,7 @@ tensorflow-gpu 1.13.1 (to GPU process)
 ## Architecture
 It's a 3 hidden layers MLP.  
 You just need to specify a .csv file with the data to training, test or validation in dataset folder.  
-You can set up the training/test file in the variable *train_path* and *test_path* ** neural_network.py **
+You can set up the training/test file in the variable *train_path* and *test_path* **neural_network.py**
 It's set to iterate up to 300 epochs with an early stopping logic to avoid divergence.  
 
 ## Hyperparameters
