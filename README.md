@@ -23,8 +23,8 @@ LAYER2 = Neurons number in the second hidden layer
 LAYER3 = Neurons number in the third hidden layer  
 LR = learning rate  
 BETA = beta parameter to regularization. 0 to ignore  
-The Hyperparameter optimization search is performed by a Random Search algorithm with 3 trails of hyperparameter
-** You can change the number of trails in the main function **
+The Hyperparameter optimization search is performed by a Random Search algorithm with 3 trails of hyperparameter  
+**You can change the number of trails in the main function**
 
 ## Feature Selection
 The method ExtraTreesClassifier is automatically applied to reduce the data dimension.  
