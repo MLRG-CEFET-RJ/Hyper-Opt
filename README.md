@@ -20,7 +20,7 @@ You can set up the training/test file in the variable *train_path* and *test_pat
 It's set to iterate up to 300 epochs with an early stopping logic to avoid divergence.  
 
 
-<img src="https://lh3.googleusercontent.com/wc7NnyZE1Y8hGL8A-fu49JVvNHJ7JAD5oALbXZW-HURfGbSZEHaW8wRDqgkJAT_d8kER8cyihtD0dMGESdrZuWzk9nlh03FJ5jy5FbuX36IBU6Ijs0WeUU5P0QdQRdkNb-szMafaoslx_UpCxNstm4mDFH4ORjI-RgFNS0ktcgPTqowQA6aa2NmX_xvKx5nPP-9sIps_doXZ9tg5dPtRRi2zHLXFEmL73bl8a-vJi8sgwTTvDQhcBIWtoXfLYFnhA4lN532YQXoEuoylk9vmZDZshQLAAxqVQ-zU3XtWPhwjinDVW1V-dIGhj-_9iv-W1-YS09B-ap_2WVs-QjtSjgldf3uq2UUJeu0lJwL5NmK24RBnZI0KaMP5cM4fYQvlt3v43Yt19QmvxRhx1RcT6DpeGD0oDFalHUMbKePlovFPGEz53oFTSB5m_zCXNiI88r61plZaWki4cbRd1VXQEVpFfwSMigqbEr_PW2LmzlKRFYs5tr-6llhwQWLbLuFD_7fup4LRyj_7_97lOPRLYSobUD1GNuFhY6HoSVon2oJN_f30z43-WWjDgcDqCWyFLUYE-OcKVREIQD6QwDxvVbWFd-mo9NyqCHSNdPWhVGbacmVm6TQfKzPmH934aTS3h7nFueTA7hFP9PmwtsGFm2yv73tCVd0=w796-h517-no" width="500" height="320">
+<img src="https://i.ibb.co/VJn7FQn/MLP.png" width="500" height="320">
 
 
 ## Hyperparameters
