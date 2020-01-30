@@ -1,4 +1,5 @@
 import datetime
+from bayes_opt import BayesianOptimization
 opening = datetime.datetime.now() #execution time start
 import os, logging
 import tensorflow as tf
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings("ignore")
 logging.disable(logging.WARNING)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+from sklearn.metrics import f1_score
 
 '''
 System args: LAYER1, LAYER2, LAYER3, LR, BETA
@@ -22,11 +24,14 @@ Example: python neural_network.py 100 200 300 0.001 0
 '''
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
-train_path =  "/home/mserqueira/BRKGA/src/python/datasets/mnist_train.csv"
-test_path = "/home/mserqueira/BRKGA/src/python/datasets/mnist_val.csv"
+
+train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv"
+test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
+#train_path =  "/mnt/sdb/home2/mserqueira/P1-8/datasets/RTO_treino_puro_p1_150.csv"
+#test_path = "/mnt/sdb/home2/mserqueira/P1-8/datasets/RTO_teste_puro_150.csv"
 
 epochs_no = 300 #Number of epochs
-batch_size = 32 #Batch size
+batch_size = 15000#32 #Batch size
 patience = 15 #Number of trials to reduce epoch loss based on the min_delta
 min_delta = 0.01 #min MSE reduction in each epoch
 patience_cnt = 0
@@ -37,7 +42,7 @@ num_x = trainX.shape[1]
 num_y = trainY.shape[1]
 
 def neural_network(LAYER1, LAYER2, LAYER3, x, y):
-   with tf.device('/device:GPU:0'):    
+   with tf.device('/device:GPU:0'):
     W1 = tf.Variable(tf.random_normal([num_x, LAYER1]))
     b1 = tf.Variable(tf.random_normal([LAYER1]))
     
@@ -114,81 +119,132 @@ def get_error(prediction, y, sess, labelX, labelY, x):
 
   return error
 
-def build_graph(layer1, layer2, layer3, learning_rate, beta, best_model):    
-    x = tf.placeholder(tf.float32, [None, num_x])
-    y = tf.placeholder(tf.float32, [None, num_y])
-    lr = tf.placeholder(tf.float32)
-    prediction, weights = neural_network(layer1, layer2, layer3, x, y)
-    
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y)) #Ou reduce_sum
-    regularizer = tf.nn.l2_loss(weights) #L2
-    loss = tf.reduce_mean(loss + beta * regularizer)
-    
-    optimizer = tf.train.AdamOptimizer(lr).minimize(loss)
-    loss_train = []
-    loss_test = []
+def build_graph(layer1, layer2, layer3, learning_rate, beta):
+    with tf.device('/device:GPU:1'):  
+      x = tf.placeholder(tf.float32, [None, num_x])
+      y = tf.placeholder(tf.float32, [None, num_y])
+      lr = tf.placeholder(tf.float32)
+      prediction, weights = neural_network(int(layer1), int(layer2), int(layer3), x, y)
+      
+      loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y)) #Ou reduce_sum
+      regularizer = tf.nn.l2_loss(weights) #L2
+      loss = tf.reduce_mean(loss + beta * regularizer)
+      
+      optimizer = tf.train.AdamOptimizer(lr).minimize(loss)
+      #loss_train = []
+      #loss_test = []
+      best_f1 = 0
 
-    with tf.Session() as sess:
-      sess.run(tf.global_variables_initializer())
-      for epoch in range(epochs_no):
-        epoch_loss = 0
-        i=0
-        while i < len(trainX):
-          start = i
-          end = i+batch_size
-          batch_x = np.array(trainX[start:end])
-          batch_y = np.array(trainY[start:end])
-          _, c = sess.run([optimizer, loss], feed_dict={x: batch_x, y: batch_y, lr: learning_rate})
-          epoch_loss += c
-          i+=batch_size
-        
-        early_flag = early_stop(epoch, epoch_loss)
-        if early_flag == False and (epoch%10==0):
-          print('Epoch ', epoch+1, 'of ', epochs_no, '| loss: ', epoch_loss)
-        if early_flag == True:
-          print("Early stopping... ", 'Epoch', epoch+1, 'of', epochs_no, '| loss:', epoch_loss)
-          break
-        loss_train.append(get_error(prediction, y, sess, trainX, trainY, x))
-        loss_test.append(get_error(prediction, y, sess, predX, predY, x))
+      with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for epoch in range(epochs_no):
+          epoch_loss = 0
+          i=0
+          while i < len(trainX):
+            start = i
+            end = i+batch_size
+            batch_x = np.array(trainX[start:end])
+            batch_y = np.array(trainY[start:end])
+            _, c = sess.run([optimizer, loss], feed_dict={x: batch_x, y: batch_y, lr: learning_rate})
+            epoch_loss += c
+            i+=batch_size
+          
+          early_flag = early_stop(epoch, epoch_loss)
+          #pred_model, pred_true, train_model, train_true = models_predictions(prediction, sess, x, y)
+          #f1 = f1_score(pred_true, pred_model, average='macro')
+          #print("Chegou aqui")
+          #if f1 < best_f1:
+            #best_f1 = f1
+            #print("Best f1 updated")
+          #if early_flag == False:
+            #print('Epoch ', epoch+1, 'of ', epochs_no, '| loss: ', epoch_loss)
+          if early_flag == True:
+            #print("Early stopping... ", 'Epoch', epoch+1, 'of', epochs_no, '| loss:', epoch_loss)
+            break
+          #loss_train.append(get_error(prediction, y, sess, trainX, trainY, x))
+          #loss_test.append(get_error(prediction, y, sess, predX, predY, x))
 
-      pred_model, pred_true, train_model, train_true = models_predictions(prediction, sess, x, y)
-      prec, rec, f1, acc = du.nn_performance_metrics(pred_model, pred_true, train_model, train_true)
+        pred_model, pred_true, train_model, train_true = models_predictions(prediction, sess, x, y)
+        prec, rec, f1, acc = du.nn_performance_metrics(pred_model, pred_true, train_model, train_true)
 
-      if acc > best_model:
-        saver = tf.train.Saver()
-        saver.save(sess, 'TF_model/sess/AutoML_model.ckpt')
-        np.savetxt("TF_model/test_classification.csv", pred_model.astype(int), delimiter=",")
-        print("\nBest model saved in TF_model folder")
+        #if f1 > best_model:
+          #saver = tf.train.Saver()
+          #saver.save(sess, 'TF_model/sess/AutoML_model.ckpt')
+          #np.savetxt("TF_model/test_classification.csv", pred_model.astype(int), delimiter=",")
+          #print("\nBest model saved in TF_model folder")
 
-      sess.close()
+        sess.close()
 
-      learning_plot(loss_train, loss_test)
-      return acc
+        #learning_plot(loss_train, loss_test)
+      return f1
 
 def random_search(num_trials):
     i=0
     best_result = 0
-    while i < num_trials:
-        layers = np.random.randint(low=500, high=1000, size=3)
+    while i <= num_trials:
+        layers1 = np.random.randint(low=5, high=15, size=1)
+        layers2 = np.random.randint(low=5, high=30, size=1)
+        layers3 = np.random.randint(low=5, high=45, size=1)
         lr = float(np.around(np.random.uniform(low=0.1, high=0.0001, size=1), decimals=6))
         rr = float(np.around(np.random.uniform(low=0, high=0.001, size=1), decimals=6))
-        max_objective = build_graph(layers[0], layers[1], layers[2], lr, rr, best_result)
+        #print("Iniciando Random Serch: ", layers1[0], layers2[0], layers3[0], lr, rr, best_result)
+        max_objective = build_graph(layers1[0], layers2[0], layers3[0], lr, rr)
         
         if max_objective > best_result:
             best_result = max_objective
-            best_params = [layers[0], layers[1], layers[2], lr, rr]
+            best_params = [layers1[0], layers2[0], layers3[0], lr, rr]
             best_trial = i
             print("Best result Updated!\n")
         i+=1
         tf.reset_default_graph()
     final = datetime.datetime.now()
     time = final-opening
-    print("Random Search final result: ", best_result)
+    print("\nRandom Search final result: ", best_result)
     print("Random Search final params: ", best_params)
-    print("\nExecution time: ", time)
+    print("Execution time: ", time)
+
+def grid_search():
+    i=0
+    best_result = 0
+    layer1 = np.array([5, 15])
+    layer2 = np.array([5, 15, 30])
+    layer3 = np.array([5, 15, 35, 45])
+    lr = np.array([0.1, 0.01, 0.001, 0.0001, 0.00001])
+    rr = np.array([0, 0.001])
+
+    for x in range(layer1.size):
+      l1 = layer1[x]
+      for y in range(layer2.size):
+        l2 = layer2[y]
+        for z in range(layer3.size):
+          l3 = layer3[z]
+          for c in range(lr.size):
+            lern_rate = lr[c]
+            for a in range(rr.size):
+              reg_rate = rr[a]
+              max_objective = build_graph(l1, l2, l3, lern_rate, reg_rate)
+              if max_objective > best_result:
+                  best_result = max_objective
+                  best_params = [l1, l2, l3, lern_rate, reg_rate]
+                  print("Best result Updated!\n")
+              tf.reset_default_graph()
+    final = datetime.datetime.now()
+    time = final-opening
+    print("\nGrid Search final result: ", best_result)
+    print("Grid Search final params: ", best_params)
+    print("Execution time: ", time)
+
+def bayes_opt():
+  bo = BayesianOptimization(build_graph, {'layer1': (5, 15), 'layer2': (5, 30), 'layer3': (5, 45), 'learning_rate':(10e-6, 0.1), 'beta':(0, 0.001)})
+  bo.maximize(init_points=40, n_iter=200, acq='ei')#acq='ucb'
+  final = datetime.datetime.now()
+  time = final-opening
+  print("Execution time: ", time)
 
 def main():
-  random_search(3)
+  random_search(240)
+  #grid_search()
+  #bayes_opt()
   return 0
 
 if __name__ == "__main__":
