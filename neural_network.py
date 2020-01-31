@@ -25,13 +25,15 @@ Example: python neural_network.py 100 200 300 0.001 0
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
 
-#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv" #MNIST
-#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
-train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_train.csv" #RECTANGLES
-test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_val.csv"
+train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv" #COSMOS
+test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
+#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_train.csv" #RECTANGLES
+#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_val.csv"
+#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/mnist_train.csv" #MNIST
+#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/mnist_val.csv"
 
 epochs_no = 300 #Number of epochs
-batch_size = 15000#32 #Batch size
+batch_size = 15000#32 #Batch size for images
 patience = 15 #Number of trials to reduce epoch loss based on the min_delta
 min_delta = 0.01 #min MSE reduction in each epoch
 patience_cnt = 0
