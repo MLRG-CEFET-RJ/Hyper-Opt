@@ -20,7 +20,6 @@ LAYER2 = Neurons number in the second hidden layer
 LAYER3 = Neurons number in the third hidden layer
 LR = learning rate
 BETA = beta parameter to regularization. 0 to ignore
-Example: python neural_network.py 100 200 300 0.001 0
 '''
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
