@@ -25,10 +25,10 @@ Example: python neural_network.py 100 200 300 0.001 0
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
 
-train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv"
-test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
-#train_path =  "/mnt/sdb/home2/mserqueira/P1-8/datasets/RTO_treino_puro_p1_150.csv"
-#test_path = "/mnt/sdb/home2/mserqueira/P1-8/datasets/RTO_teste_puro_150.csv"
+#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv" #MNIST
+#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
+train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_train.csv" #RECTANGLES
+test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_val.csv"
 
 epochs_no = 300 #Number of epochs
 batch_size = 15000#32 #Batch size
@@ -194,7 +194,9 @@ def random_search(num_trials):
             best_result = max_objective
             best_params = [layers1[0], layers2[0], layers3[0], lr, rr]
             best_trial = i
-            print("Best result Updated!\n")
+            print("Best result Updated!")
+            print("F1 value: ", best_result)
+            print("Trial number: ", i, "\n")
         i+=1
         tf.reset_default_graph()
     final = datetime.datetime.now()
@@ -223,10 +225,13 @@ def grid_search():
             for a in range(rr.size):
               reg_rate = rr[a]
               max_objective = build_graph(l1, l2, l3, lern_rate, reg_rate)
+              i+=1
               if max_objective > best_result:
                   best_result = max_objective
                   best_params = [l1, l2, l3, lern_rate, reg_rate]
                   print("Best result Updated!\n")
+                  print("F1 value: ", best_result)
+                  print("Trial number: ", i, "\n")
               tf.reset_default_graph()
     final = datetime.datetime.now()
     time = final-opening
