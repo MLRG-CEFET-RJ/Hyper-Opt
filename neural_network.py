@@ -8,6 +8,7 @@ import data_utils as du
 import sys
 import warnings
 import matplotlib.pyplot as plt
+from sklearn.metrics import precision_score, f1_score, recall_score, accuracy_score
 warnings.filterwarnings("ignore")
 logging.disable(logging.WARNING)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -24,15 +25,13 @@ BETA = beta parameter to regularization. 0 to ignore
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
 
-train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train_SMOTE.csv" #COSMOS
+train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train.csv"
 test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
 #train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_train.csv" #RECTANGLES
 #test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_val.csv"
-#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/mnist_train.csv" #MNIST
-#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/mnist_val.csv"
 
 epochs_no = 300 #Number of epochs
-batch_size = 15000#32 #Batch size for images
+batch_size = 15000#32 #Batch size
 patience = 15 #Number of trials to reduce epoch loss based on the min_delta
 min_delta = 0.01 #min MSE reduction in each epoch
 patience_cnt = 0
@@ -121,20 +120,20 @@ def get_error(prediction, y, sess, labelX, labelY, x):
   return error
 
 def build_graph(layer1, layer2, layer3, learning_rate, beta):
-    with tf.device('/device:GPU:1'):  
+    with tf.device('/device:GPU:0'):  
       x = tf.placeholder(tf.float32, [None, num_x])
       y = tf.placeholder(tf.float32, [None, num_y])
       lr = tf.placeholder(tf.float32)
       prediction, weights = neural_network(int(layer1), int(layer2), int(layer3), x, y)
       
-      loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y)) #Ou reduce_sum
+      loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
       regularizer = tf.nn.l2_loss(weights) #L2
       loss = tf.reduce_mean(loss + beta * regularizer)
       
       optimizer = tf.train.AdamOptimizer(lr).minimize(loss)
       #loss_train = []
       #loss_test = []
-      best_f1 = 0
+      f1_best = 0
 
       with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -151,24 +150,14 @@ def build_graph(layer1, layer2, layer3, learning_rate, beta):
             i+=batch_size
           
           early_flag = early_stop(epoch, epoch_loss)
-          #pred_model, pred_true, train_model, train_true = models_predictions(prediction, sess, x, y)
-          #f1 = f1_score(pred_true, pred_model, average='macro')
-          #print("Chegou aqui")
-          #if f1 < best_f1:
-            #best_f1 = f1
-            #print("Best f1 updated")
-          #if early_flag == False:
-            #print('Epoch ', epoch+1, 'of ', epochs_no, '| loss: ', epoch_loss)
+          f1_epoch = get_f1(prediction, y, sess, predX, predY, x)
+          if f1_epoch > f1_best:
+          	f1_best = f1_epoch
           if early_flag == True:
             #print("Early stopping... ", 'Epoch', epoch+1, 'of', epochs_no, '| loss:', epoch_loss)
             break
-          #loss_train.append(get_error(prediction, y, sess, trainX, trainY, x))
-          #loss_test.append(get_error(prediction, y, sess, predX, predY, x))
 
-        pred_model, pred_true, train_model, train_true = models_predictions(prediction, sess, x, y)
-        prec, rec, f1, acc = du.nn_performance_metrics(pred_model, pred_true, train_model, train_true)
-
-        #if f1 > best_model:
+        #if f1 > best_model: #Caso para salvar o melhor modelo...
           #saver = tf.train.Saver()
           #saver.save(sess, 'TF_model/sess/AutoML_model.ckpt')
           #np.savetxt("TF_model/test_classification.csv", pred_model.astype(int), delimiter=",")
@@ -176,8 +165,8 @@ def build_graph(layer1, layer2, layer3, learning_rate, beta):
 
         sess.close()
 
-        #learning_plot(loss_train, loss_test)
-      return f1
+        learning_plot(loss_train, loss_test)
+      return f1_best
 
 def random_search(num_trials):
     i=0
@@ -246,6 +235,15 @@ def bayes_opt():
   final = datetime.datetime.now()
   time = final-opening
   print("Execution time: ", time)
+
+def get_f1(prediction, y, sess, predX, predY, x):
+  pred_model =  tf.argmax(prediction, 1)
+  pred_model = sess.run(pred_model, feed_dict={x:predX, y:predY})
+  pred_true =  tf.argmax(y, 1)
+  pred_true = sess.run(pred_true, feed_dict={x:predX, y:predY})
+  f1 = f1_score(pred_true, pred_model, average='macro')
+
+  return f1
 
 def main():
   random_search(240)
