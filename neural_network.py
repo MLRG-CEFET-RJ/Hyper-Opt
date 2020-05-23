@@ -25,13 +25,18 @@ BETA = beta parameter to regularization. 0 to ignore
 
 #Train/dev/test path whitespace separated file without header. Target in the last column (data_utils)
 
-train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_train.csv"
-test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/cosmos_val.csv"
-#train_path =  "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_train.csv" #RECTANGLES
-#test_path = "/mnt/sdb/home2/mserqueira/COSMOS/dataset/rectangles_val.csv"
+if str(sys.argv[2]) == 'cosmos':
+  train_path =  "/dataset/cosmos_train_SMOTE.csv" #COSMOS
+  test_path = "/dataset/cosmos_val.csv"
+  hyper_args = du.hyper_space('cosmos')
+
+if str(sys.argv[2]) == 'rectangles':
+  train_path =  "/dataset/rectangles_train.csv" #RECTANGLES
+  test_path = "/dataset/rectangles_val.csv"
+  hyper_args = du.hyper_space('others')
 
 epochs_no = 300 #Number of epochs
-batch_size = 15000#32 #Batch size
+batch_size = 15000 #32 for images Batch size
 patience = 15 #Number of trials to reduce epoch loss based on the min_delta
 min_delta = 0.01 #min MSE reduction in each epoch
 patience_cnt = 0
@@ -84,6 +89,9 @@ def models_predictions(prediction, sess, x, y):
 def early_stop(epoch, epoch_loss):
   global patience_cnt
   global prior
+  if epoch == 0:
+    patience_cnt = 0
+    prior = float("inf")
   if epoch > 0 and prior - epoch_loss > min_delta:
     patience_cnt = 0
     flag = False
@@ -126,7 +134,7 @@ def build_graph(layer1, layer2, layer3, learning_rate, beta):
       lr = tf.placeholder(tf.float32)
       prediction, weights = neural_network(int(layer1), int(layer2), int(layer3), x, y)
       
-      loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+      loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y)) #Ou reduce_sum
       regularizer = tf.nn.l2_loss(weights) #L2
       loss = tf.reduce_mean(loss + beta * regularizer)
       
@@ -152,12 +160,16 @@ def build_graph(layer1, layer2, layer3, learning_rate, beta):
           early_flag = early_stop(epoch, epoch_loss)
           f1_epoch = get_f1(prediction, y, sess, predX, predY, x)
           if f1_epoch > f1_best:
-          	f1_best = f1_epoch
+            f1_best = f1_epoch
+          #if early_flag == False:
+            #print('Epoch ', epoch+1, 'of ', epochs_no, '| loss: ', epoch_loss)
           if early_flag == True:
-            #print("Early stopping... ", 'Epoch', epoch+1, 'of', epochs_no, '| loss:', epoch_loss)
+            print("Early stopping... ", 'Epoch', epoch+1, 'of', epochs_no, '| loss:', epoch_loss)
             break
-
-        #if f1 > best_model: #Caso para salvar o melhor modelo...
+        
+        #loss_train.append(get_error(prediction, y, sess, trainX, trainY, x))
+        #loss_test.append(get_error(prediction, y, sess, predX, predY, x))
+        #if f1 > best_model: #To save the best model
           #saver = tf.train.Saver()
           #saver.save(sess, 'TF_model/sess/AutoML_model.ckpt')
           #np.savetxt("TF_model/test_classification.csv", pred_model.astype(int), delimiter=",")
@@ -165,19 +177,20 @@ def build_graph(layer1, layer2, layer3, learning_rate, beta):
 
         sess.close()
 
-        learning_plot(loss_train, loss_test)
+        #learning_plot(loss_train, loss_test)
       return f1_best
 
 def random_search(num_trials):
-    i=0
+    i=1
     best_result = 0
     while i <= num_trials:
-        layers1 = np.random.randint(low=5, high=15, size=1)
-        layers2 = np.random.randint(low=5, high=30, size=1)
-        layers3 = np.random.randint(low=5, high=45, size=1)
-        lr = float(np.around(np.random.uniform(low=0.1, high=0.0001, size=1), decimals=6))
-        rr = float(np.around(np.random.uniform(low=0, high=0.001, size=1), decimals=6))
-        #print("Iniciando Random Serch: ", layers1[0], layers2[0], layers3[0], lr, rr, best_result)
+        layers1 = np.random.randint(low=hyper_args['layer1'][0], high=hyper_args['layer1'][1], size=1)
+        layers2 = np.random.randint(low=hyper_args['layer2'][0], high=hyper_args['layer2'][1], size=1)
+        layers3 = np.random.randint(low=hyper_args['layer3'][0], high=hyper_args['layer3'][1], size=1)
+        lr = float(np.around(np.random.uniform(low=hyper_args['learning_rate'][0], high=hyper_args['learning_rate'][1], size=1), decimals=6))
+        rr = float(np.around(np.random.uniform(low=hyper_args['beta'][0], high=hyper_args['beta'][1], size=1), decimals=6))
+        print("Iniciando Random Serch: ", layers1[0], layers2[0], layers3[0], lr, rr, best_result)
+        print("Iniciando tentativa numero: ", i, "\n")
         max_objective = build_graph(layers1[0], layers2[0], layers3[0], lr, rr)
         
         if max_objective > best_result:
@@ -230,7 +243,11 @@ def grid_search():
     print("Execution time: ", time)
 
 def bayes_opt():
-  bo = BayesianOptimization(build_graph, {'layer1': (5, 15), 'layer2': (5, 30), 'layer3': (5, 45), 'learning_rate':(10e-6, 0.1), 'beta':(0, 0.001)})
+  bo = BayesianOptimization(build_graph, {'layer1': (hyper_args['layer1'][0], hyper_args['layer1'][1]),
+   'layer2': (hyper_args['layer2'][0], hyper_args['layer1'][1]),
+    'layer3': (hyper_args['layer3'][0], hyper_args['layer3'][1]),
+     'learning_rate':(hyper_args['learning_rate'][0], hyper_args['learning_rate'][1]),
+      'beta':(hyper_args['beta'][0], hyper_args['beta'][1])})
   bo.maximize(init_points=40, n_iter=200, acq='ei')#acq='ucb'
   final = datetime.datetime.now()
   time = final-opening
@@ -246,9 +263,12 @@ def get_f1(prediction, y, sess, predX, predY, x):
   return f1
 
 def main():
-  random_search(240)
-  #grid_search()
-  #bayes_opt()
+  if str(sys.argv[1]) == 'rs':
+    random_search(240)
+  if str(sys.argv[1]) == 'gs':
+    grid_search()
+  if str(sys.argv[1]) == 'bo':
+    bayes_opt()
   return 0
 
 if __name__ == "__main__":
