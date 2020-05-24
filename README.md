@@ -10,7 +10,9 @@ Acesso ao dataset COSMOS completo https://drive.google.com/file/d/13BGv152uKLPLv
 ## Execução
 
 python neural_network.py arg1 arg2
+
 arg1 = gs (grid search), rs (random search) ou bo (bayesian optimizaion)
+
 arg2 = cosmos, rectangles, mnits (file dependecy)
 
 Exemplo:
