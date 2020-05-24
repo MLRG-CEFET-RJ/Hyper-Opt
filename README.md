@@ -1,7 +1,10 @@
 # Hyper-Opt
 Arquivo para geração do dataset de validação, treino e teste contido na pasta data_generator_COSMOS
+
 Arquivo principal neural_network.py com os métodos de busca e o código da rede neural.
+
 Pasta /dataset contém arquivos de exemplo.
+
 Acesso ao dataset COSMOS completo https://drive.google.com/file/d/13BGv152uKLPLvYUqJiA4Yxj32g97JQdr/view?usp=sharing
 
 ## Execução
@@ -30,6 +33,7 @@ tensorflow-gpu 1.13.1 (to GPU process)
 ### R 3.5.0 ou superior
 #### Packages
 Todas as dependencias podem ser instaladas através da função pre_install_libraries() em Preprocessamento.R
+
 Todas as dependencias são carregadas utilizando a função pre_load_libraries()
 
 ## Hyperparameters
